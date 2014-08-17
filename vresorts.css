@@ -1,0 +1,25 @@
+
+.ui-page {
+    background-color: #F8F8F8;
+}
+
+@media only screen and (min-width: 600px) {
+    .ui-page {
+        width: 600px !important;
+        margin: auto !important;
+        position: relative !important;
+    }
+}
+
+.centeredPic {
+    text-align:center;
+}
+
+.leftText {
+    text-align:left;
+}
+
+.errorLabel {
+    color:#FF0000;
+}
+

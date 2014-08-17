@@ -1,0 +1,250 @@
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Partner Portal</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="external/jquery.mobile-1.4.2.min.css"/>
+<link rel="stylesheet" type="text/css" href="external/smoothness.datepick.css"/>
+<link rel="stylesheet" type="text/css" href="vresorts.css"/>
+
+<script type="text/javascript" src="external/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="external/jquery.mobile-1.4.2.min.js"></script>
+<script type="text/javascript" src="external/apigee.min.js"></script>
+<script type="text/javascript" src="external/jquery.plugin.js"></script>
+<script type="text/javascript" src="external/jquery.datepick.js"></script>
+<script type="text/javascript" src="external/jquery.serialize-object.min.js"></script>
+<script type="text/javascript" src="external/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="databaseAdapter.js"></script>
+<script type="text/javascript" src="login.js"></script>
+<script type="text/javascript" src="partner.js"></script>
+<script type="text/javascript" src="partnerController.js"></script>
+<script type="text/javascript" src="offer.js"></script>
+<script type="text/javascript" src="offerController.js"></script>
+<script type="text/javascript" src="coupon.js"></script>
+<script type="text/javascript" src="geofence.js"></script>
+<script type="text/javascript" src="transaction.js"></script>
+<script type="text/javascript" src="transactionController.js"></script>
+
+</head>
+
+<body>
+
+<div data-role="page" id="page_partner_start">
+    <div data-role="header"><h1>Partner Portal</h1></div>    
+    <div data-role="main">
+        <br>
+        <div data-role="controlgroup">
+            <a data-role="button" href="#page_partner_login">Login</a>
+            <a data-role="button" href="#page_create_partner">Create New Account</a>            
+        </div>
+    </div>  
+</div>
+
+<div data-role="page" id="page_create_partner">
+    <div data-role="header"><h1>New Partner Account</h1></div>    
+    <div data-role="main">
+        <form id="form_create_partner">
+            <br>
+            <label>Username</label>
+            <input name="username" type="text">
+            <br>
+            <label>Password</label>
+            <input name="password" type="password">
+            <br>
+            <label>Email</label>
+            <input name="email" type="text">
+            <br>
+            <label>Company Name</label>
+            <input name="company_name" type="text">
+            <br>
+            <label>Phone Number</label>
+            <input name="phone" type="text">
+            <br>
+            <label>Business Address</label>
+            <input name="address" type="text">
+            <br>            
+            <a data-role="button" onclick="createPartnerClicked();">Create Account</a>
+        </form>
+    </div>
+</div>
+    
+<div data-role="page" id="page_partner_login">
+    <div data-role="header"><h1>Partner Log In</h1></div>
+    <div data-role="main">
+        <form id="form_partner_login">
+            <br>
+            <label>Username</label>
+            <input name="username" type="text">
+            <br>
+            <label>Password</label>
+            <input name="password" type="password">
+            <br>
+            <a data-role="button" onclick="partnerLoginClicked();">Log In</a>
+        </form>
+    </div>
+</div>
+
+<div data-role="page" id="page_create_partner_success">
+    <div data-role="header"><h1>Account Created Successfully</h1></div>    
+    <div data-role="main">
+        <p>Your new account has been created.</p>        
+        <a data-role="button" href="#page_partner_login">Log In</a>
+    </div>
+</div>
+
+<div data-role="page" id="page_create_partner_error">
+    <div data-role="header"><h1>Error Creating a New Account</h1></div>    
+    <div data-role="main">
+        <p>Sorry, there was an error creating a new account.</p>        
+        <a data-role="button" href="#page_create_partner">Try Again</a>
+    </div>
+</div>
+
+<div data-role="page" id="page_partner_login_error">
+    <div data-role="header"><h1>Problem Logging In</h1></div>
+    <div data-role="main">
+        <p>There seems to be an error with your username or password.</p>        
+        <a data-role="button" href="#page_partner_login">Try Again</a>
+    </div>
+</div>
+
+<div data-role="page" id="page_partner_home">
+    <div data-role="header"><h1>Partner Home</h1></div>    
+    <div data-role="main">
+        <br>
+        <div data-role="controlgroup">
+            <a data-role="button" href="#page_view_partner_offers">Offers</a>
+<!--Bowen: adding transaction button-->
+            <a data-role="button" href="#page_view_trans">Transactions</a>
+<!--End of adding transaction button-->
+            <a data-role="button" onclick="partnerLogout();">Log Out</a>
+        </div>
+    </div>
+</div>
+
+<div data-role="page" id="page_view_partner_offers">
+    <div data-role="header">
+         <div data-role="header">
+            <div class="ui-btn-left" data-role="controlgroup">
+                <a href="#page_partner_home" data-role="button" data-icon="home">Home</a>
+                <a href="#" data-rel="back" data-role="button" data-icon="back">Back</a>
+            </div>
+            <h1>Offers</h1>
+            <div class="ui-btn-right" data-role="controlgroup">
+                <a data-role="button" href="#page_create_offer" data-icon="plus">Add</a>
+            </div>
+        </div>
+    </div>
+    <div data-role="main">
+        <ul id="list_view_partner_offers" data-role="listview"></ul>
+    </div>
+</div>
+    
+<!--Bowen: adding view transactions page-->
+<div data-role="page" id="page_view_trans">
+    <div data-role="header">
+         <div data-role="header">
+            <div class="ui-btn-left" data-role="controlgroup">
+                <a href="#page_partner_home" data-role="button" data-icon="home">Home</a>
+                <a href="#" data-rel="back" data-role="button" data-icon="back">Back</a>
+            </div>
+            <h1>Transactions</h1>
+        </div>
+    </div>
+    <div data-role="main">
+        <ul id="list_view_trans" data-role="listview"></ul>
+    </div>
+</div>
+<!--End of adding view transactions page-->
+
+<div data-role="page" id="page_create_offer">
+    <div data-role="header"><h1>New Offer</h1></div>    
+    <div data-role="main">
+        <form id="form_create_offer">
+            <br>
+            <label>Long Description</label>
+            <input name="long_desc" type="text" maxlength="256">
+            <br>
+            <label>Short Description (less than 40 characters)</label>
+            <input name="short_desc" type="text" maxlength="40">
+            <br>
+            <label>Offer Terms</label>
+            <input name="terms" type="text" maxlength="256">
+            <br>
+            <label>Store Name</label>
+            <input name="store_name" type="text" maxlength="256">
+            <br>
+            <label>Store Address</label>
+            <input name="store_address" type="text" maxlength="256">
+            <br>
+            <label>Store Phone Number</label>
+            <input name="store_phone" type="text" maxlength="15">
+            <br>
+            <label>Start Date</label>
+            <input name="start_date" type="text" maxlength="32">
+            <br>
+            <label>End Date</label>
+            <input name="end_date" type="text" maxlength="32">
+            <br>
+            <label>Discount</label>
+            <input name="discount" type="text" maxlength="256">
+            <br>
+            <label>Geofence Latitude</label>
+            <input name="latitude" type="text" maxlength="32">
+            <br>
+            <label>Geofence Longitude</label>
+            <input name="longitude" type="text" maxlength="32">
+            <br>
+            <label>Geofence Radius</label>
+            <input name="radius" type="text" maxlength="32">
+            <br>
+            <label>Coupon Redemption Password</label>
+            <input name="redeem_password" id="redeem_password" type="password" maxlength="15">
+            <br>
+            <label>Confirm Coupon Redemption Password</label>
+            <input name="redeem_password_confirmed" type="password" maxlength="15">
+            <br>
+            <label>Coupon Image</label>
+            <input name="coupon_image" type="file">
+            <br>
+            <img id="coupon_image_canvas" width="100%">
+            <br>
+            <a data-role="button" id="button_create_offer" onclick="createOfferClicked();">Create Offer</a>
+        </form>
+    </div>
+</div>
+
+<div data-role="page" id="page_view_offer_details">
+    <div data-role="header">
+            <div class="ui-btn-left" data-role="controlgroup">
+                <a href="#page_partner_home" data-role="button" data-icon="home">Home</a>
+                <a href="#" data-rel="back" data-role="button" data-icon="back">Back</a>
+            </div>
+            <h1>Offer Details</h1>
+        </div>
+    <div data-role="content" id="div_view_offer_detail"></div>
+</div>
+
+<div data-role="page" id="page_create_offer_error">
+    <div data-role="header"><h1>Error Creating a New Offer</h1></div>    
+    <div data-role="main">
+        <p>Sorry, there was an error creating a new offer.</p>        
+        <a data-role="button" href="#page_create_offer">Try Again</a>
+    </div>
+</div>
+
+<div data-role="popup" id="popup_delete_offer" class="ui-corner-all">
+    <div id="div_delete_offer_confirm" style="padding:20px 20px;background-color:white;" class="ui-corner-all" align="center"></div>
+</div>
+
+</body>
+
+</html>
+
