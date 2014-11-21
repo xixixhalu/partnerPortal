@@ -1,0 +1,87 @@
+<html>
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Bill Portal</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="external/jquery.mobile-1.4.2.min.css"/>
+<link rel="stylesheet" type="text/css" href="external/smoothness.datepick.css"/>
+<link rel="stylesheet" type="text/css" href="vresorts.css"/>
+
+<script type="text/javascript" src="external/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="external/jquery.mobile-1.4.2.min.js"></script>
+<script type="text/javascript" src="external/apigee.min.js"></script>
+<script type="text/javascript" src="external/jquery.plugin.js"></script>
+<script type="text/javascript" src="external/jquery.datepick.js"></script>
+<script type="text/javascript" src="external/jquery.serialize-object.min.js"></script>
+<script type="text/javascript" src="external/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="databaseAdapter.js"></script>
+<script type="text/javascript" src="billController.js"></script>
+<script type="text/javascript" src="login.js"></script>
+<script type="text/javascript" src="partner.js"></script>
+<script type="text/javascript" src="partnerController.js"></script>
+<script type="text/javascript" src="offer.js"></script>
+<script type="text/javascript" src="offerController.js"></script>
+<script type="text/javascript" src="coupon.js"></script>
+<script type="text/javascript" src="geofence.js"></script>
+<script type="text/javascript" src="transaction.js"></script>
+<script type="text/javascript" src="transactionController.js"></script>
+<script type="text/javascript" src="bill.js"></script>
+
+
+    
+    <script>
+    $( document ).ready(function() {
+		doGuestLogin();
+		$("#m").empty();
+		
+		$.urlParam = function(name){
+			var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+			if (results==null){
+				return null;
+			}
+			else{
+				return results[1] || 0;
+			}
+		}
+		//updateBill(PARTNER_UUID);
+		id = decodeURIComponent($.urlParam('id'));
+		pid = decodeURIComponent($.urlParam('pid'));
+		month = decodeURIComponent($.urlParam('month'));
+		year = decodeURIComponent($.urlParam('year'));
+		
+		if(month != 'null' && year != 'null')
+		{
+			MONTH = month;
+			YEAR = year;
+			console.log(month + " " + year);
+		}
+		else
+		{	
+			console.log("pid unset");
+		}		
+		
+		//$("#m").append(id);
+		updateBill(id,pid, month, year);
+        
+    });
+
+	
+    $( window ).load(function() {
+        console.log( "window loaded" );
+    });
+    </script>
+
+</head>
+<body>
+<div id="m"></div>
+
+</body>
+
+</html>

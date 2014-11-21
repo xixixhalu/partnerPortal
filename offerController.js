@@ -252,7 +252,7 @@ function getBase64Image(img) {
 
 	// Copy the image contents to the canvas
 	var ctx = canvas.getContext("2d");
-	ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+	ctx.drawImage(img, 0, 0);
 
 	// Get the data-URL formatted image
 	// Firefox supports PNG and JPEG. You could check

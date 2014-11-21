@@ -1,13 +1,28 @@
 var TRANSACTION_ATTRIBUTES = [
-    "uuid",
-    "amount",
-    "created",
-    "offer_uuid",
-    "coupon_code",
-    "partner_uuid",
-    "status",
-    "user_uuid"
+  "uuid",
+  "amount",
+  "created",
+  "offer_uuid",
+  "coupon_code",
+  "partner_uuid",
+  "status",
+  "user_uuid"
 ];
+
+
+//Mustafa's transaction database
+//var TRANSACTION_ATTRIBUTES = [
+//    "uuid",
+//    "amount",
+//    "created",
+//    "offer_uuid",
+//    "coupon_code",
+//    "partner_uuid",
+//    "status",
+//	"store_name",
+//	"store_address",
+//    "user_uuid"
+//];
 
 function createTransaction(createTransactionObj, successCB, errorCB) {
     createTransactionObj.type = "transaction";
