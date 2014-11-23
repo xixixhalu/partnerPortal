@@ -1,3 +1,5 @@
+var redeemPassword = "0";
+var couponImage = "0";
 
 $(document).ready(function() {
     // Initializes the validator.
@@ -56,13 +58,70 @@ $(document).ready(function() {
             redeem_password_confirmed: {
                 required: true,
                 rangelength:[6, 15],
-                equalTo: "#redeem_password"
+                equalTo: "#form_create_offer #redeem_password"
             }
         },
         errorPlacement: function (error, element) {
             error.appendTo(element.parent().prev());
         }
     });
+
+    $("#form_edit_offer").validate({
+        rules: {
+            long_desc: {
+                required:true,
+                rangelength:[1, 256]
+            },
+            short_desc: {
+                required:true,
+                rangelength:[1, 40]
+            },
+            terms: {
+                required:true,
+                rangelength:[1, 256]
+            },
+            store_name: {
+                required:true,
+                rangelength:[1, 256]
+            },
+            store_address: {
+                required:true,
+                rangelength:[1, 256]
+            },
+            store_phone: {
+                required:true,
+                rangelength:[9, 15]
+            },
+            start_date: {
+                required:true,
+                date:true,
+                rangelength:[1, 32]
+            },
+            end_date: {
+                required:true,
+                date:true,
+                rangelength:[1, 32]
+            },
+            discount: {
+                required:true,
+                rangelength:[1, 256]
+            },
+            redeem_password: {
+                required: true,
+                rangelength:[6, 15]
+            },
+            redeem_password_confirmed: {
+                required: true,
+                rangelength:[6, 15],
+                equalTo: "#form_edit_offer #redeem_password"
+            }
+        },
+        errorPlacement: function (error, element) {
+            error.appendTo(element.parent().prev());
+        }
+    });
+
+    //add validate here for edit offer
 
     $("#page_view_partner_offers").bind("pagebeforeshow", function(event) {
         loadOffers();
@@ -76,10 +135,22 @@ $(document).ready(function() {
 
 	    fr.onload = function(ev2) {
 		    //console.dir(ev2);
-		    $('#coupon_image_canvas').attr('src', ev2.target.result);
+		    $('#form_edit_offer #edit_coupon_image_canvas').attr('src', ev2.target.result);
 	    };
 
 	    fr.readAsDataURL(f);
+    });
+    $("form[id='form_edit_offer'] input[name='coupon_image']").on('change', function(ev) {
+
+        var f = ev.target.files[0];
+        var fr = new FileReader();
+
+        fr.onload = function(ev2) {
+            //console.dir(ev2);
+            $('#form_edit_offer #edit_coupon_image_canvas').attr('src', ev2.target.result);
+        };
+
+        fr.readAsDataURL(f);
     });
 });
 
@@ -89,16 +160,21 @@ function createOfferClicked() {
     if(validator.form()) {
         $("#button_create_offer").prop('disabled', true).addClass('ui-disabled');
         var offerObj = $("#form_create_offer").serializeObject();
-        delete offerObj.coupon_image;
-        delete offerObj.redeem_password_confirmed;
+        //delete offerObj.coupon_image;
+        //delete offerObj.redeem_password_confirmed;
 
         var geofenceObj = {};
         geofenceObj.radius = offerObj.radius;
         geofenceObj.longitude = offerObj.longitude;
         geofenceObj.latitude = offerObj.latitude;
-        delete offerObj.radius;
-        delete offerObj.longitude;
-        delete offerObj.latitude;
+        //delete offerObj.radius;
+        //delete offerObj.longitude;
+        //delete offerObj.latitude;
+
+        //tested by linfeng
+        offerObj.image_data = getBase64Image($('#coupon_image_canvas').get(0));
+        //do we have to teset the type of image???
+        offerObj.image_type = "jpg";
 
         createOffer(offerObj, function (result) {
             geofenceObj.offer_uuid = result._data.uuid;
@@ -131,6 +207,36 @@ function createOfferClicked() {
     }
 }
 
+function editOfferStoreClicked() {
+    var validator = $("#form_edit_offer").validate();
+
+    if(validator.form()) {
+        $("#button_edit_offer").prop('disabled', true).addClass('ui-disabled');
+        var offerObj = $("#form_edit_offer").serializeObject();
+
+        var geofenceObj = {};
+        geofenceObj.radius = offerObj.radius;
+        geofenceObj.longitude = offerObj.longitude;
+        geofenceObj.latitude = offerObj.latitude;
+
+        offerObj.image_data = getBase64Image($('#edit_coupon_image_canvas').get(0));
+
+        offerObj.image_type = "jpg";
+
+        // console.log("for updating");
+
+        updateOffer(offerObj.uuid,offerObj, function (result) {
+            
+            //$("#form_edit_offer").trigger("reset");
+            $("#button_edit_offer").prop('disabled', false).removeClass('ui-disabled');
+        },
+        function() {
+            $.mobile.changePage("#page_edit_offer_error");
+            $("#button_edit_offer").prop('disabled', false).removeClass('ui-disabled');
+        });
+    }
+}
+
 function loadOffers() {
     // Nested function definition for the success callback that goes to readMultipleOffers().
     function loadOffersSuccessCB(offerList) {
@@ -146,6 +252,12 @@ function loadOffers() {
                 + "onclick=\x22viewOfferClicked(\x27" + offer.uuid + "\x27);\x22>View Details</a>"
                 + "<a href='#' data-role='button' data-icon='delete' data-mini='true'"
                 + "onclick=\x22deleteOfferClickedUnconfirmed(\x27" + offer.uuid + "\x27);\x22>Delete</a>"
+                //edit button
+                
+                + "<a href='#' data-role='button' data-icon='edit' data-mini='true'"
+                + "onclick=\x22editOfferClicked(\x27" + offer.uuid + "\x27);\x22>Edit</a>"     
+
+                //public end tag
                 + "</div></li>"
 		    );
         });
@@ -166,43 +278,53 @@ function loadOffers() {
 }
 
 function viewOfferClicked(uuid) {
+    $("#div_view_offer_detail").empty();
+    $("#div_view_offer_title").empty();
+    $("#div_view_offer_img").empty();
+
     // Nested function definition for the success callback that goes to readOffer().
-    function viewOfferClickedSuccessCB(offer) {
-        $("#div_view_offer_detail").empty();
+     readOffer(uuid, function(offer) {
+        $("#div_view_offer_title").append("<center>" + offer.store_name + "</center>");
+
+        $("#div_view_offer_img").append(
+            "<center><img width='40%' height='40%' src='data:image/jpeg;base64,"+ offer.image_data +"'/></center>");
 
         $("#div_view_offer_detail").append(
-	        "<h1><center>"
-            + offer.store_name
-            + "</center></h1>"
-            + "<br><br><b>Short Description:</b><br>"
-	        + offer.short_desc
-	        + "<br><br><b>Long Description:</b><br>"
-	        + offer.long_desc
-	        + "<br><br><b>Terms and Conditions:</b><br>"
-	        + offer.terms
-	        + "<br><br><b>Address:</b><br>"
-	        + offer.store_address
-	        + "<br><br><b>Phone Number:</b><br>"
-	        + offer.store_phone
-	        + "<br><br><b>Offer Start Date:</b><br>"
-	        + offer.start_date
-	        + "<br><br><b>Offer End Date:</b><br>"
-	        + offer.end_date
-	        + "<br><br><b>Discount:</b><br>"
-	        + offer.discount
-            + "<br><br></div>"
+             "<table style='padding:0px 0px'>"
+            + "<col width='22px' height='15px'><col height='15px'>"
+            + "<tr>"
+            + "<td><a class='ui-btn ui-corner-all ui-icon-location ui-btn-icon-notext' style='padding:0;border:none;background:none;'></a></td>"
+            + "<td rowspan='2'>" + offer.store_address + "</td>"
+            + "</tr>"
+            + "<tr><td></td></tr>"
+            + "<tr>"
+            + "<td><a class='ui-btn ui-corner-all ui-icon-phone ui-btn-icon-notext' style='padding:0;border:none;background:none;'></a></td>"
+            + "<td rowspan='2'>" + offer.store_phone + "</td>"
+            + "</tr>"
+            + "<tr><td></td></tr>"
+            + "<tr>"
+            + "<td><a class='ui-btn ui-corner-all ui-icon-info ui-btn-icon-notext' style='padding:0;border:none;background:none;'></a></td>"
+            + "<td rowspan='2'>" + offer.long_desc + "</td>"
+            + "</tr>"
+            + "<tr><td></td></tr>"
+            + "<tr>"
+            + "<td></td>"
+            + "<td>" + offer.terms + "</td>"
+            + "</tr>"
+            + "<tr>"
+            + "<td><a class='ui-btn ui-corner-all ui-icon-clock ui-btn-icon-notext' style='padding:0;border:none;background:none;'></a></td>"
+            + "<td>" + offer.start_date +" - " + offer.end_date +"</td>"
+            + "</tr>"
+            + "</table>"
+            + "<br>"
         );
-
         $.mobile.changePage("#page_view_offer_details");
-    }
-
-    // Nested function definition for the error callback that goes to readOffer().
-    function viewOfferClickedErrorCB() {
-        $.mobile.changePage("#page_view_partner_offers");
-    }
-
-    // Reads the offer.
-    readOffer(uuid, viewOfferClickedSuccessCB, viewOfferClickedErrorCB);
+        //$("#popup_offer_details").popup("open");
+    },
+    function(){
+        $("#div_offer_details").append("Unable to get offer details at this time.");
+        //$("#popup_offer_details").popup("open");
+    });
 }
 
 function deleteOfferClicked(uuid) {
@@ -252,7 +374,7 @@ function getBase64Image(img) {
 
 	// Copy the image contents to the canvas
 	var ctx = canvas.getContext("2d");
-	ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+	ctx.drawImage(img, 0, 0);
 
 	// Get the data-URL formatted image
 	// Firefox supports PNG and JPEG. You could check
@@ -265,34 +387,190 @@ function getBase64Image(img) {
 			/^data:image\/(png|jpg);base64,/, "");
 }
 
-/*
-function gRead() {
-    function gReadSuccessCB(coupon) {
-        // Displays success message.
-        $("#div_read_coupon").empty();
-        $("#div_read_coupon").append(
-	        "<b>UUID: </b>" + coupon.uuid + "<br>"
-            + "<b>ImageType: </b>" + coupon.imageType + "<br>"
-            + "<b>Description: </b>" + coupon.description + "<br>"
-            + "<b>Place UUID: </b>" + coupon.place_uuid + "<br>"
-            + "<img src='data:image/png;base64,"
-            + coupon.imageData + "'/>"
-	    );
+//new function for edit offer
+function editOfferClicked(uuid) {
+    // Nested function definition for the success callback that goes to readOffer().
+    function editOfferClickedSuccessCB(offer) {
+        //$("#div_offer_edit").empty();
+        $("#check_coupon").empty();
+        $("#check_geofence").empty();
 
-        // Clears the input field.
-        $("#input_uuid_for_read").val("");
-    }
+        $("#form_edit_offer input[name*='long_desc']").val(offer.long_desc);
+        $("#form_edit_offer input[name*='short_desc']").val(offer.short_desc);
+        $("#form_edit_offer input[name*='terms']").val(offer.terms);
+        $("#form_edit_offer input[name*='store_name']").val(offer.store_name);
+        $("#form_edit_offer input[name*='store_address']").val(offer.store_address);
+        $("#form_edit_offer input[name*='store_phone']").val(offer.store_phone);
+        $("#form_edit_offer input[name*='start_date']").val(offer.start_date);
+        $("#form_edit_offer input[name*='end_date']").val(offer.end_date);
+        $("#form_edit_offer input[name*='discount']").val(offer.discount);
+        $("#form_edit_offer input[name*='latitude']").val(offer.latitude);
+        $("#form_edit_offer input[name*='longitude']").val(offer.longitude);
+        $("#form_edit_offer input[name*='radius']").val(offer.radius);
+        $("#form_edit_offer input[name*='redeem_password']").val(offer.redeem_password);
+        $("#form_edit_offer input[name*='redeem_password_confirmed']").val(offer.redeem_password_confirmed);
+        //picture modifed needs improving
 
-    function gReadErrorCB() {
-        // Displays failure message.
-        $("#div_read_coupon").empty();
-        $("#div_read_coupon").append(
-            "Failed to read the coupon."
+        $("#check_geofence").append(
+            "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
+            + "onclick=\x22checkGeoClicked(\x27"
+            + offer.latitude + "\x27,\x27" + offer.longitude
+            + "\x27);\x22>Geofence Test</a>"
         );
+
+        $("#check_coupon").append(
+            "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
+            + "onclick=\x22passwordClicked(\x27"
+            + offer.uuid
+            + "\x27);\x22>Coupon Test</a>"
+        );
+
+        redeemPassword = offer.redeem_password;
+        couponImage = offer.image_data;
+        $.mobile.changePage("#offer_edit_page");
     }
 
-    var uuid = $("#input_uuid_for_read").val();
-    readCoupon(uuid, gReadSuccessCB, gReadErrorCB);
-}
-*/
+    // Nested function definition for the error callback that goes to readOffer().
+    //how can I modify this error???
+    function editOfferClickedErrorCB() {
+        $.mobile.changePage("#page_view_partner_offers");
+    }
 
+    // Reads the offer.
+    readOffer(uuid, editOfferClickedSuccessCB, editOfferClickedErrorCB);
+}
+
+/*for coupon test*/
+function getCouponClicked(offerID){
+    // var for baecode generator
+    TimeStamp = new Date().getTime();  // system time- how many minllion seconds
+    MTimeStamp = parseInt(TimeStamp/(1000 * 60)); // how many minutes
+    MTimeStampString = MTimeStamp.toString();
+    myOfferID = offerID;
+    CouponCode = MTimeStampString.concat(myOfferID.replace(/-/g,''));
+    
+    readOffer(offerID, function() {
+              //display coupon
+              $('#div_coupon_details').append('<img src="data:image/png;base64,' + couponImage + '" height="100%" width="100%" /><br>');
+              $('#div_barcode').barcode(CouponCode, "code93",{barWidth:1, barHeight:50});
+              $('#div_coupon_details').append('<h3>Store code: ' + window.globalID.couponEncode.substr(0,3)
+                + window.globalID.couponEncode.slice(-3) + '</h3>')
+             
+              },
+              function(){
+              $('#div_coupon_details').append('Unable to get coupon at this time.');
+
+              });
+    $.mobile.changePage("#page_coupon_details");
+}
+
+function passwordClicked(uuid) {
+    $("#div_password").empty();
+
+    $("#div_password").append(
+                              "<p>Please have a store employee enter the password to redeem your coupon!</p>"
+                              + "<label align='left'>Partner code </label>"
+                              + "<input type='password' name='password' id='offer_password' value='' placeholder='password' align='left'>"
+                              + "<p align='left'>Please ask the shop for the code.</p>"
+                              + "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
+                              + "onclick=\x22passwordCheck(\x27" + uuid + "\x27);\x22>Get Coupon</button>"
+                              + "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
+                              + "onclick=\x22$('#popup_password').popup('close');\x22>Close</button>"
+                              + "</div>"
+                              );
+    $("#popup_password").popup('open');
+    
+    // $.getJSON("http://xixixhalu-test.apigee.net/proxy/tripPlanner/getPlaces?trip_plan_uuid=" + window.globalID.tripPlanuuid, function(tripplan){
+    //           $.each(tripplan.places, function(i, item){
+    //                  var tmpID = item.uuid;
+    //                  var tmpIsSub = item.is_subscribed;
+    //                  if(item.offer_uuid == window.globalID.offeruuid && tmpIsSub == "true"){
+    //                     togglePlaceSubscription(tmpID);
+    //             }
+                     
+    //         })
+    // });
+    
+    // $.getJSON("http://xixixhalu-test.apigee.net/proxy/tripPlanner/getOffer?offer_uuid="+ window.globalID.offeruuid, function(offer){
+    //           redeemPassword = offer.redeem_password;
+    //           partnerUUID = offer.partner_uuid;
+    //           couponIMAGE = offer.coupon.image_data;
+    //           });
+}
+
+
+function passwordCheck(uuid){
+    var inputPassword = document.getElementById("offer_password").value;
+    if( inputPassword == redeemPassword){
+        getCouponClicked(uuid);
+    }
+    else{
+        alert("Wrong password, please try again");
+    }
+}
+
+// function checkGeoClicked(){
+//         $("#map-canvas").empty();
+//         //google.maps.event.addDomListener(window, 'load', initialize());
+//         //$("#popup_googlemap").popup("open");
+//         initialize();
+// }
+
+// function initialize() {
+//     var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
+//     var mapOptions = {
+//     zoom: 4,
+//     center: myLatlng
+//     }
+//     var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+//     var marker = new google.maps.Marker({
+//       position: myLatlng,
+//       map: map,
+//       title: 'My location'
+//     });
+// }
+
+function checkGeoClicked(latitude, longitude){
+
+    if(!(latitude >= -90 && latitude <=90) || !(longitude >= -180 && longitude <= 180)){
+        alert("Please input valid latitude and longitude!");
+    }
+    else{
+        $("#googlemap_button").empty();
+        $("#map-canvas").empty();
+        initialize(latitude, longitude);
+        $("#googlemap_button").append(
+            "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
+            + "onclick=\x22$('#popup_googlemap').popup('close');\x22>Close</button>"
+        );
+        $("#popup_googlemap").popup("open");
+    }
+}
+
+function initialize(latitude, longitude) {
+    var myLatlng = new google.maps.LatLng(latitude,longitude);
+    var mapOptions = {
+    zoom: 17,
+    center: myLatlng,
+    }
+    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+
+    var circleOptions = {
+        map:map,
+        strokeColor: '#FF0000',
+        strokeOpacity: 0.8,
+        strokeWeight: 2,
+        fillColor: '#FF0000',
+        fillOpacity: 0.35,
+        center: myLatlng,
+        radius: 200
+    }
+    cityCircle = new google.maps.Circle(circleOptions);
+
+    var marker = new google.maps.Marker({
+      position: myLatlng,
+      map: map,
+      title: 'My location'
+    });
+}

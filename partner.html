@@ -20,6 +20,8 @@
 <script type="text/javascript" src="external/jquery.datepick.js"></script>
 <script type="text/javascript" src="external/jquery.serialize-object.min.js"></script>
 <script type="text/javascript" src="external/jquery.validate.min.js"></script>
+<script type="text/javascript" src="external/jquery-barcode.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?v=3.exp"></script>
 
 <script type="text/javascript" src="databaseAdapter.js"></script>
 <script type="text/javascript" src="login.js"></script>
@@ -31,6 +33,7 @@
 <script type="text/javascript" src="geofence.js"></script>
 <script type="text/javascript" src="transaction.js"></script>
 <script type="text/javascript" src="transactionController.js"></script>
+<script type="text/javascript" src="globalid.js"></script>
 
 </head>
 
@@ -220,15 +223,17 @@
         </form>
     </div>
 </div>
-
+<!--For Pattra App dispaly Modification-->
 <div data-role="page" id="page_view_offer_details">
     <div data-role="header">
-            <div class="ui-btn-left" data-role="controlgroup">
-                <a href="#page_partner_home" data-role="button" data-icon="home">Home</a>
-                <a href="#" data-rel="back" data-role="button" data-icon="back">Back</a>
-            </div>
-            <h1>Offer Details</h1>
+        <div class="ui-btn-left" data-role="controlgroup">
+            <a href="#page_partner_home" data-role="button" data-icon="home">Home</a>
+            <a href="#" data-rel="back" data-role="button" data-icon="back">Back</a>
         </div>
+        <h1>Offer Details</h1>
+    </div>
+    <div data-role="content" id="div_view_offer_title"></div>
+    <div data-role="content" id="div_view_offer_img"></div>
     <div data-role="content" id="div_view_offer_detail"></div>
 </div>
 
@@ -242,6 +247,111 @@
 
 <div data-role="popup" id="popup_delete_offer" class="ui-corner-all">
     <div id="div_delete_offer_confirm" style="padding:20px 20px;background-color:white;" class="ui-corner-all" align="center"></div>
+</div>
+
+<!-- for editable offer -->
+<div data-role="page" id = "offer_edit_page">
+    <div data-role="header">
+        <div class="ui-btn-left" data-role="controlgroup">
+            <a href="#page_partner_home" data-role="button" data-icon="home">Home</a>
+            <a href="#" data-rel="back" data-role="button" data-icon="back">Back</a>
+        </div>
+        <h1>Offer Edit</h1>
+    </div>
+    <div data-role="main" id="div_offer_edit">
+        <form id="form_edit_offer">
+            <br>
+            <label>Long Description</label>
+            <input name="long_desc" type="text" maxlength="256" value="">
+            <br>
+            <label>Short Description (less than 40 characters)</label>
+            <input name="short_desc" type="text" maxlength="40" value="">
+            <br>
+            <label>Offer Terms</label>
+            <input name="terms" type="text" maxlength="256" value="">
+            <br>
+            <label>Store Name</label>
+            <input name="store_name" type="text" maxlength="256" value="">
+            <br>
+            <label>Store Address</label>
+            <input name="store_address" type="text" maxlength="256" value="">
+            <br>
+            <label>Store Phone Number</label>
+            <input name="store_phone" type="text" maxlength="15" value="">
+            <br>
+            <label>Start Date</label>
+            <input name="start_date" type="text" maxlength="32" value="">
+            <br>
+            <label>End Date</label>
+            <input name="end_date" type="text" maxlength="32" value="">
+            <br>
+            <label>Discount</label>
+            <input name="discount" type="text" maxlength="256" value="">
+            <br>
+            <label>Geofence Latitude</label>
+            <input name="latitude" type="text" maxlength="32" value="">
+            <br>
+            <label>Geofence Longitude</label>
+            <input name="longitude" type="text" maxlength="32" value="">
+            <br>
+            <label>Geofence Radius</label>
+            <input name="radius" type="text" maxlength="32" value="">
+
+            <div name="check_geofence" id="check_geofence">          
+            </div>
+
+            <br>
+            <label>Coupon Redemption Password</label>
+            <input name="redeem_password" id="redeem_password" type="password" maxlength="15" value="">
+            <br>
+            <label>Confirm Coupon Redemption Password</label>
+            <input name="redeem_password_confirmed" type="password" maxlength="15" value="">
+
+            <div name="check_coupon" id="check_coupon">          
+            </div>
+
+            <br>
+            <label>Coupon Image</label>
+            <input name="coupon_image" type="file">
+            <br>
+            <img id="edit_coupon_image_canvas" width="100%">
+            <br>
+            <a data-role="button" id="button_edit_offer" onclick="editOfferStoreClicked();">Edit Offer</a>
+        </form>
+
+         <div data-role="popup" id="popup_password" class="ui-corner-all">
+           <div style="width:100%; padding:5px 5px;background-color:white;" class="ui-corner-all" align="center" id="div_password">
+           </div>
+           <div id="div_password_message"></div>
+        </div>
+
+        <div data-role="popup" id="popup_googlemap" class="ui-corner-all">
+            <div id="map-canvas" style="height: 500px; width:500px; margin: 0px;padding: 0px" align="center"></div>
+            <div id="googlemap_button" align="center"></div>
+        </div>
+
+    </div>
+</div>
+
+<!--needs to test-->
+<div data-role="page" id="page_edit_offer_error">
+    <div data-role="header"><h1>Error Editing this Offer</h1></div>    
+    <div data-role="main">
+        <p>Sorry, there was an error editing this offer.</p>        
+        <a data-role="button" href="#offer_edit_page">Try Again</a>
+    </div>
+</div>
+
+    <!--this is for the pop up coupon check-->
+<div data-role="page" id="page_coupon_details">
+    <div data-role="header">
+        <h1>Coupon</h1>
+    </div>
+    <div data-role="content" id="div_coupon_container" align="center">
+        <div data-role="content" id="div_coupon_details"></div>
+        <div data-role="content" id="div_barcode"></div>
+        <a data-role="button" data-rel="back" href="#" data-icon="back">Go Back</a>
+    </div>
 </div>
 
 </body>

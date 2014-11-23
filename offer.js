@@ -14,7 +14,14 @@ var OFFER_ATTRIBUTES = [
     "start_date",
     "end_date",
     "discount",
-    "image_url"
+    //"image_url",
+    "redeem_password",
+    "redeem_password_confirmed",
+    "radius",
+    "latitude",
+    "longitude",
+    "image_type",
+    "image_data"
 ];
 
 function createOffer(createOfferObj, successCB, errorCB) {
@@ -50,3 +57,46 @@ function readSpecifiedOffers(query, successCB, errorCB) {
     getSpecifiedEntities("offer", query, OFFER_ATTRIBUTES, successCB, errorCB);
 };
 
+//coupon.js
+function createCoupon(createCouponObj, successCB, errorCB) {
+    createCouponObj.type = "coupon";
+    postEntity(createCouponObj, successCB, errorCB);
+}
+
+function readCoupon(uuid, successCB, errorCB) {
+    getEntity("coupon", uuid, COUPON_ATTRIBUTES, successCB, errorCB);
+}
+
+function readMultipleCoupons(attribute, value, successCB, errorCB) {
+    getEntities("coupon", attribute, value, COUPON_ATTRIBUTES, successCB, errorCB);
+}
+
+function deleteCoupon(uuid, successCB, errorCB) {
+    deleteEntity("coupon", uuid, successCB, errorCB);
+}
+
+function deleteCouponsForOffer(uuid, successCB, errorCB) {
+    deleteEntities("coupon", "offer_uuid", uuid, successCB, errorCB);
+}
+
+//geofence.js
+function createGeofence(createGeofenceObj, successCB, errorCB) {
+    createGeofenceObj.type = "geofence";
+    postEntity(createGeofenceObj, successCB, errorCB);
+}
+
+function readGeofence(uuid, successCB, errorCB) {
+    getEntity("eofence", uuid, GEOFENCE_ATTRIBUTES, successCB, errorCB);
+}
+
+function readMultipleGeofences(attribute, value, successCB, errorCB) {
+    getEntities("geofence", attribute, value, GEOFENCE_ATTRIBUTES, successCB, errorCB);
+}
+
+function deleteGeofence(uuid, successCB, errorCB) {
+    deleteEntity("geofence", uuid, successCB, errorCB);
+}
+
+function deleteGeofencesForOffer(uuid, successCB, errorCB) {
+    deleteEntities("geofence", "offer_uuid", uuid, successCB, errorCB);
+}
