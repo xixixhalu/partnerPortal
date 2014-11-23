@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<title>Partner Portal</title>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+<link rel="stylesheet" type="text/css" href="external/jquery.mobile-1.4.2.min.css"/>
+<link rel="stylesheet" type="text/css" href="external/smoothness.datepick.css"/>
+<link rel="stylesheet" type="text/css" href="vresorts.css"/>
+
+<script type="text/javascript" src="external/jquery-1.11.0.min.js"></script>
+<script type="text/javascript" src="external/jquery.mobile-1.4.2.min.js"></script>
+<script type="text/javascript" src="external/apigee.min.js"></script>
+<script type="text/javascript" src="external/jquery.plugin.js"></script>
+<script type="text/javascript" src="external/jquery.datepick.js"></script>
+<script type="text/javascript" src="external/jquery.serialize-object.min.js"></script>
+<script type="text/javascript" src="external/jquery.validate.min.js"></script>
+
+<script type="text/javascript" src="databaseAdapter.js"></script>
+<script type="text/javascript" src="login.js"></script>
+<script type="text/javascript" src="partner.js"></script>
+<script type="text/javascript" src="partnerController.js"></script>
+<script type="text/javascript" src="offer.js"></script>
+<script type="text/javascript" src="offerController.js"></script>
+<script type="text/javascript" src="coupon.js"></script>
+<script type="text/javascript" src="geofence.js"></script>
+<script type="text/javascript" src="transaction.js"></script>
+<script type="text/javascript" src="transactionController.js"></script>
+<script type="text/javascript" src="bill.js"></script>
+<script type="text/javascript" src="billController.js"></script>
+<script type="text/javascript" src="generateBillController.js"></script>
+<script type="text/javascript" src="generateBill.js"></script>	
+
+</head>
+<body>
+
+<div data-role="page" id="page_view_bills">
+
+	<div data-role="main">
+	
+		<div data-role="content" id="div_view_generate_bill">
+		</div>
+		
+	
+		<form id="form_view_bill_monthly">
+			<a data-role="button" id="button_create_offer" onclick="generateBillClicked();">Generate Bills</a>
+		</form>
+        
+    </div>
+
+</div>
+</body>

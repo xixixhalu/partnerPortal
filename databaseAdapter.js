@@ -87,21 +87,26 @@ function getEntity(type, uuid, typeAttributes, successCB, errorCB) {
 // Modifies an entity. "type" and "uuid" must be specified in the object passed in by
 // the first parameter.
 function modifyEntity(data, successCB, errorCB) {
-    var updateObj = {
-        client:CLIENT,
-        data:data
+	
+   var updateObj = {
+        'client':CLIENT,
+        'data':data
     };
-
+	console.log(updateObj);
+	
     var updateEntity = new Apigee.Entity(updateObj);
 
+	console.log(updateEntity);
+	
     updateEntity.save(function (error, result) {
         if (error) { 
-            errorCB();
+			errorCB();
         }
         else { 
 	        successCB();
         }
-    });    
+    });
+	//$("#m").append(updateEntity);
 }
 
 // CRUD: Delete one.
@@ -155,6 +160,7 @@ function deleteEntities(type, attribute, value, successCB, errorCB) {
 // The success callback has one argument that refers to a list of the retrieved entities.
 function getSpecifiedEntities(type, query, typeAttributes, successCB, errorCB) {
 
+	doGuestLogin();
     var entityList = [];
 	var queryObj = {
 		client:CLIENT,
@@ -166,7 +172,7 @@ function getSpecifiedEntities(type, query, typeAttributes, successCB, errorCB) {
 			limit:999
 		}
 	}
-				   
+	console.log(queryObj);
 	var entities = new Apigee.Collection(queryObj);
 
 	entities.fetch(
