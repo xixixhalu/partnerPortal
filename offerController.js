@@ -1,5 +1,6 @@
 var redeemPassword = "0";
 var couponImage = "0";
+var editofferuuid = "0";
 
 $(document).ready(function() {
     // Initializes the validator.
@@ -214,20 +215,15 @@ function editOfferStoreClicked() {
         $("#button_edit_offer").prop('disabled', true).addClass('ui-disabled');
         var offerObj = $("#form_edit_offer").serializeObject();
 
-        var geofenceObj = {};
-        geofenceObj.radius = offerObj.radius;
-        geofenceObj.longitude = offerObj.longitude;
-        geofenceObj.latitude = offerObj.latitude;
 
         offerObj.image_data = getBase64Image($('#edit_coupon_image_canvas').get(0));
 
         offerObj.image_type = "jpg";
 
-        // console.log("for updating");
+        offerObj.uuid = editofferuuid;
 
         updateOffer(offerObj.uuid,offerObj, function (result) {
-            
-            //$("#form_edit_offer").trigger("reset");
+            $.mobile.changePage("#page_view_partner_offers");
             $("#button_edit_offer").prop('disabled', false).removeClass('ui-disabled');
         },
         function() {
@@ -414,7 +410,7 @@ function editOfferClicked(uuid) {
         $("#check_geofence").append(
             "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
             + "onclick=\x22checkGeoClicked(\x27"
-            + offer.latitude + "\x27,\x27" + offer.longitude
+            + offer.latitude + "\x27,\x27" + offer.longitude + "\x27,\x27" + offer.radius
             + "\x27);\x22>Geofence Test</a>"
         );
 
@@ -427,11 +423,10 @@ function editOfferClicked(uuid) {
 
         redeemPassword = offer.redeem_password;
         couponImage = offer.image_data;
+        editofferuuid = offer.uuid;
         $.mobile.changePage("#offer_edit_page");
     }
 
-    // Nested function definition for the error callback that goes to readOffer().
-    //how can I modify this error???
     function editOfferClickedErrorCB() {
         $.mobile.changePage("#page_view_partner_offers");
     }
@@ -440,7 +435,6 @@ function editOfferClicked(uuid) {
     readOffer(uuid, editOfferClickedSuccessCB, editOfferClickedErrorCB);
 }
 
-/*for coupon test*/
 function getCouponClicked(offerID){
     // var for baecode generator
     TimeStamp = new Date().getTime();  // system time- how many minllion seconds
@@ -450,17 +444,17 @@ function getCouponClicked(offerID){
     CouponCode = MTimeStampString.concat(myOfferID.replace(/-/g,''));
     
     readOffer(offerID, function() {
-              //display coupon
-              $('#div_coupon_details').append('<img src="data:image/png;base64,' + couponImage + '" height="100%" width="100%" /><br>');
-              $('#div_barcode').barcode(CouponCode, "code93",{barWidth:1, barHeight:50});
-              $('#div_coupon_details').append('<h3>Store code: ' + window.globalID.couponEncode.substr(0,3)
-                + window.globalID.couponEncode.slice(-3) + '</h3>')
-             
-              },
-              function(){
-              $('#div_coupon_details').append('Unable to get coupon at this time.');
+        //display coupon
+        $('#div_coupon_details').append('<img src="data:image/png;base64,' + couponImage + '" height="100%" width="100%" /><br>');
+        $('#div_barcode').barcode(CouponCode, "code93",{barWidth:1, barHeight:50});
+        $('#div_coupon_details').append('<h3>Store code: ' + window.globalID.couponEncode.substr(0,3)
+        + window.globalID.couponEncode.slice(-3) + '</h3>')
 
-              });
+        },
+        function(){
+        $('#div_coupon_details').append('Unable to get coupon at this time.');
+
+        });
     $.mobile.changePage("#page_coupon_details");
 }
 
@@ -479,23 +473,6 @@ function passwordClicked(uuid) {
                               + "</div>"
                               );
     $("#popup_password").popup('open');
-    
-    // $.getJSON("http://xixixhalu-test.apigee.net/proxy/tripPlanner/getPlaces?trip_plan_uuid=" + window.globalID.tripPlanuuid, function(tripplan){
-    //           $.each(tripplan.places, function(i, item){
-    //                  var tmpID = item.uuid;
-    //                  var tmpIsSub = item.is_subscribed;
-    //                  if(item.offer_uuid == window.globalID.offeruuid && tmpIsSub == "true"){
-    //                     togglePlaceSubscription(tmpID);
-    //             }
-                     
-    //         })
-    // });
-    
-    // $.getJSON("http://xixixhalu-test.apigee.net/proxy/tripPlanner/getOffer?offer_uuid="+ window.globalID.offeruuid, function(offer){
-    //           redeemPassword = offer.redeem_password;
-    //           partnerUUID = offer.partner_uuid;
-    //           couponIMAGE = offer.coupon.image_data;
-    //           });
 }
 
 
@@ -509,29 +486,8 @@ function passwordCheck(uuid){
     }
 }
 
-// function checkGeoClicked(){
-//         $("#map-canvas").empty();
-//         //google.maps.event.addDomListener(window, 'load', initialize());
-//         //$("#popup_googlemap").popup("open");
-//         initialize();
-// }
 
-// function initialize() {
-//     var myLatlng = new google.maps.LatLng(-25.363882,131.044922);
-//     var mapOptions = {
-//     zoom: 4,
-//     center: myLatlng
-//     }
-//     var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
-//     var marker = new google.maps.Marker({
-//       position: myLatlng,
-//       map: map,
-//       title: 'My location'
-//     });
-// }
-
-function checkGeoClicked(latitude, longitude){
+function checkGeoClicked(latitude, longitude, input_radius){
 
     if(!(latitude >= -90 && latitude <=90) || !(longitude >= -180 && longitude <= 180)){
         alert("Please input valid latitude and longitude!");
@@ -539,7 +495,7 @@ function checkGeoClicked(latitude, longitude){
     else{
         $("#googlemap_button").empty();
         $("#map-canvas").empty();
-        initialize(latitude, longitude);
+        initialize(latitude, longitude, input_radius);
         $("#googlemap_button").append(
             "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
             + "onclick=\x22$('#popup_googlemap').popup('close');\x22>Close</button>"
@@ -548,7 +504,7 @@ function checkGeoClicked(latitude, longitude){
     }
 }
 
-function initialize(latitude, longitude) {
+function initialize(latitude, longitude, input_radius) {
     var myLatlng = new google.maps.LatLng(latitude,longitude);
     var mapOptions = {
     zoom: 17,
@@ -564,7 +520,7 @@ function initialize(latitude, longitude) {
         fillColor: '#FF0000',
         fillOpacity: 0.35,
         center: myLatlng,
-        radius: 200
+        radius: parseInt(input_radius)
     }
     cityCircle = new google.maps.Circle(circleOptions);
 
