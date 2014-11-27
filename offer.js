@@ -1,5 +1,3 @@
-
-
 var OFFER_ATTRIBUTES = [
     "uuid",
     "created",
@@ -21,7 +19,10 @@ var OFFER_ATTRIBUTES = [
     "latitude",
     "longitude",
     "image_type",
-    "image_data"
+    "image_data",
+    "AVG_DWELL_TIME",
+    "NUM_VISITS",
+    "NUM_REDEMPTIONS"
 ];
 
 function createOffer(createOfferObj, successCB, errorCB) {
