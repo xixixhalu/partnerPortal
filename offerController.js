@@ -136,7 +136,7 @@ $(document).ready(function() {
 
 	    fr.onload = function(ev2) {
 		    //console.dir(ev2);
-		    $('#form_edit_offer #edit_coupon_image_canvas').attr('src', ev2.target.result);
+		    $('#form_create_offer #coupon_image_canvas').attr('src', ev2.target.result);
 	    };
 
 	    fr.readAsDataURL(f);
@@ -163,6 +163,11 @@ function createOfferClicked() {
         var offerObj = $("#form_create_offer").serializeObject();
         //delete offerObj.coupon_image;
         //delete offerObj.redeem_password_confirmed;
+
+        //add three new attributes in accordance with 
+        offerObj.AVG_DWELL_TIME = 0;
+        offerObj.NUM_VISITS = 0;
+        offerObj.NUM_REDEMPTIONS = 0;
 
         var geofenceObj = {};
         geofenceObj.radius = offerObj.radius;
