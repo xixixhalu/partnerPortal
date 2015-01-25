@@ -52,6 +52,18 @@ $(document).ready(function() {
                 required:true,
                 rangelength:[1, 256]
             },
+            latitude:{
+                required:true,
+                range:[-90, 90]
+            },
+            longitude: {
+                required:true,
+                range:[-180, 180]
+            },
+            radius: {
+                required:true,
+                range:[100, 500]
+            },
             redeem_password: {
                 required: true,
                 rangelength:[6, 15]
@@ -107,6 +119,18 @@ $(document).ready(function() {
                 required:true,
                 rangelength:[1, 256]
             },
+            latitude:{
+                required:true,
+                range:[-90, 90]
+            },
+            longitude: {
+                required:true,
+                range:[-180, 180]
+            },
+            radius: {
+                required:true,
+                range:[100, 500]
+            },
             redeem_password: {
                 required: true,
                 rangelength:[6, 15]
@@ -129,7 +153,11 @@ $(document).ready(function() {
     });
     $("form[id='form_create_offer'] input[name='start_date']").datepick();
     $("form[id='form_create_offer'] input[name='end_date']").datepick();
+    $("form[id='form_edit_offer'] input[name='start_date']").datepick();
+    $("form[id='form_edit_offer'] input[name='end_date']").datepick();
+
     $("#popup_delete_offer").popup();
+
     $("form[id='form_create_offer'] input[name='coupon_image']").on('change', function(ev) {
 	    var f = ev.target.files[0];
 	    var fr = new FileReader();
@@ -177,9 +205,9 @@ function createOfferClicked() {
         //delete offerObj.longitude;
         //delete offerObj.latitude;
 
-        //tested by linfeng
+        
         offerObj.image_data = getBase64Image($('#coupon_image_canvas').get(0));
-        //do we have to teset the type of image???
+        
         offerObj.image_type = "jpg";
 
         createOffer(offerObj, function (result) {
@@ -394,7 +422,7 @@ function editOfferClicked(uuid) {
     function editOfferClickedSuccessCB(offer) {
         //$("#div_offer_edit").empty();
         $("#check_coupon").empty();
-        $("#check_geofence").empty();
+        // $("#check_geofence").empty();
 
         $("#form_edit_offer input[name*='long_desc']").val(offer.long_desc);
         $("#form_edit_offer input[name*='short_desc']").val(offer.short_desc);
@@ -410,14 +438,6 @@ function editOfferClicked(uuid) {
         $("#form_edit_offer input[name*='radius']").val(offer.radius);
         $("#form_edit_offer input[name*='redeem_password']").val(offer.redeem_password);
         $("#form_edit_offer input[name*='redeem_password_confirmed']").val(offer.redeem_password_confirmed);
-        //picture modifed needs improving
-
-        $("#check_geofence").append(
-            "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
-            + "onclick=\x22checkGeoClicked(\x27"
-            + offer.latitude + "\x27,\x27" + offer.longitude + "\x27,\x27" + offer.radius
-            + "\x27);\x22>Geofence Test</a>"
-        );
 
         $("#check_coupon").append(
             "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
@@ -492,31 +512,72 @@ function passwordCheck(uuid){
 }
 
 
-function checkGeoClicked(latitude, longitude, input_radius){
-
-    if(!(latitude >= -90 && latitude <=90) || !(longitude >= -180 && longitude <= 180)){
-        alert("Please input valid latitude and longitude!");
+function checkGeoClicked(option){
+    var offerObj ="";
+    if(option == "create"){
+        offerObj = $("#form_create_offer").serializeObject();
     }
     else{
-        $("#googlemap_button").empty();
-        $("#map-canvas").empty();
-        initialize(latitude, longitude, input_radius);
-        $("#googlemap_button").append(
-            "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
-            + "onclick=\x22$('#popup_googlemap').popup('close');\x22>Close</button>"
-        );
-        $("#popup_googlemap").popup("open");
+        offerObj = $("#form_edit_offer").serializeObject();
+    }
+    
+    var _latitude = offerObj.latitude;
+    var _longitude = offerObj.longitude;
+    var _radius = offerObj.radius;
+
+    if(_latitude.length == 0 || _longitude.length == 0) {
+        alert("Please input both latitude and longitude!");
+    }
+    else{
+        if(_latitude >= -90 && _latitude <=90 && _longitude >= -180 && _longitude <= 180){
+            if(_radius.length == 0) {
+                _radius = 200;
+            }
+            _radius = parseInt(_radius);
+            if(!(_radius <= 500 && _radius >= 100)){
+                alert("Please input valid radius!");
+            }
+            else{
+                if(option == "create"){
+                    $("#create_googlemap_button").empty();
+                    $("#create_map-canvas").empty();
+                    initialize(_latitude, _longitude, _radius, option);
+                    $("#create_googlemap_button").append(
+                        "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
+                        + "onclick=\x22$('#create_popup_googlemap').popup('close');\x22>Close</button>"
+                    );
+                    $("#create_popup_googlemap").popup("open");
+                }
+                else{
+                    $("#googlemap_button").empty();
+                    $("#map-canvas").empty();
+                    initialize(_latitude, _longitude, _radius, option);
+                    $("#googlemap_button").append(
+                        "<button type='button' style='background-color:#EEEEEE; border-style:solid; border-color:#CCCCCC'; "
+                        + "onclick=\x22$('#popup_googlemap').popup('close');\x22>Close</button>"
+                    );
+                    $("#popup_googlemap").popup("open");
+                }
+            }
+        }  
+        else{
+            alert("Please input valid latitude and longitude!");
+        }
     }
 }
 
-function initialize(latitude, longitude, input_radius) {
+function initialize(latitude, longitude, input_radius, option) {
     var myLatlng = new google.maps.LatLng(latitude,longitude);
     var mapOptions = {
     zoom: 17,
     center: myLatlng,
     }
-    var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
+    if(option == "edit"){
+        var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
+    }
+    else{
+        var map = new google.maps.Map(document.getElementById('create_map-canvas'), mapOptions);
+    }
     var circleOptions = {
         map:map,
         strokeColor: '#FF0000',
@@ -525,7 +586,7 @@ function initialize(latitude, longitude, input_radius) {
         fillColor: '#FF0000',
         fillOpacity: 0.35,
         center: myLatlng,
-        radius: parseInt(input_radius)
+        radius: input_radius
     }
     cityCircle = new google.maps.Circle(circleOptions);
 

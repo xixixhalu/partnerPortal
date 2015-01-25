@@ -282,46 +282,56 @@
         <form id="form_create_offer">
             <br>
             <label>Long Description</label>
-            <input name="long_desc" type="text" maxlength="256">
+            <input name="long_desc" type="text" maxlength="256" value="">
             <br>
             <label>Short Description (less than 40 characters)</label>
-            <input name="short_desc" type="text" maxlength="40">
+            <input name="short_desc" type="text" maxlength="40" value="">
             <br>
             <label>Offer Terms</label>
-            <input name="terms" type="text" maxlength="256">
+            <input name="terms" type="text" maxlength="256" value="">
             <br>
             <label>Store Name</label>
-            <input name="store_name" type="text" maxlength="256">
+            <input name="store_name" type="text" maxlength="256" value="">
             <br>
             <label>Store Address</label>
-            <input name="store_address" type="text" maxlength="256">
+            <input name="store_address" type="text" maxlength="256" value="">
             <br>
             <label>Store Phone Number</label>
-            <input name="store_phone" type="text" maxlength="15">
+            <input name="store_phone" type="text" maxlength="15" value="">
             <br>
             <label>Start Date</label>
-            <input name="start_date" type="text" maxlength="32">
+            <input name="start_date" type="text" maxlength="32" value="">
             <br>
             <label>End Date</label>
-            <input name="end_date" type="text" maxlength="32">
+            <input name="end_date" type="text" maxlength="32" value="">
             <br>
             <label>Discount</label>
-            <input name="discount" type="text" maxlength="256">
+            <input name="discount" type="text" maxlength="256" value="">
             <br>
             <label>Geofence Latitude</label>
-            <input name="latitude" type="text" maxlength="32">
+            <input name="latitude" type="text" maxlength="32" value="">
             <br>
             <label>Geofence Longitude</label>
-            <input name="longitude" type="text" maxlength="32">
+            <input name="longitude" type="text" maxlength="32" value="">
             <br>
             <label>Geofence Radius</label>
-            <input name="radius" type="text" maxlength="32">
+            <input name="radius" type="text" maxlength="32" value="">
+
+            <div name="create_check_geofence" id="create_check_geofence"> 
+                <a href="#" data-role="button" onclick="checkGeoClicked('create')">Geofence Test</a>         
+            </div>
+
             <br>
             <label>Coupon Redemption Password</label>
-            <input name="redeem_password" id="redeem_password" type="password" maxlength="15">
+            <input name="redeem_password" id="redeem_password" type="password" maxlength="15" value="">
             <br>
             <label>Confirm Coupon Redemption Password</label>
-            <input name="redeem_password_confirmed" type="password" maxlength="15">
+            <input name="redeem_password_confirmed" type="password" maxlength="15" value="">
+
+            <!-- <div name="check_coupon" id="create_check_coupon">     
+                <a href="#" data-role="button">Coupon Test</a>      
+            </div> -->
+
             <br>
             <label>Coupon Image</label>
             <input name="coupon_image" type="file">
@@ -330,6 +340,17 @@
             <br>
             <a data-role="button" id="button_create_offer" onclick="createOfferClicked();">Create Offer</a>
         </form>
+
+        <!-- <div data-role="popup" id="create_popup_password" class="ui-corner-all">
+           <div style="width:100%; padding:5px 5px;background-color:white;" class="ui-corner-all" align="center" id="create_div_password">
+           </div>
+           <div id="create_div_password_message"></div>
+        </div> -->
+
+        <div data-role="popup" id="create_popup_googlemap" class="ui-corner-all">
+            <div id="create_map-canvas" style="height: 500px; width:500px; margin: 0px;padding: 0px" align="center"></div>
+            <div id="create_googlemap_button" align="center"></div>
+        </div>
     </div>
 </div>
 <!--For Pattra App dispaly Modification-->
@@ -398,15 +419,16 @@
             <input name="discount" type="text" maxlength="256" value="">
             <br>
             <label>Geofence Latitude</label>
-            <input name="latitude" type="text" maxlength="32" value="">
+            <input name="latitude" type="text" class="edit_geo_test" maxlength="32" value="">
             <br>
             <label>Geofence Longitude</label>
-            <input name="longitude" type="text" maxlength="32" value="">
+            <input name="longitude" type="text" class="edit_geo_test" maxlength="32" value="">
             <br>
             <label>Geofence Radius</label>
-            <input name="radius" type="text" maxlength="32" value="">
+            <input name="radius" type="text" class="edit_geo_test" maxlength="32" value="">
 
-            <div name="check_geofence" id="check_geofence">          
+            <div name="check_geofence" id="check_geofence">    
+                <a href="#" data-role="button" onclick="checkGeoClicked('edit')">Geofence Test</a>    
             </div>
 
             <br>
