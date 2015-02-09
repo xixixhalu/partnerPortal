@@ -6,7 +6,7 @@ var MONTH = -1;
 var YEAR = -1;
 // var ORG_NAME = "vresorts";
 // var APP_NAME = "futuretravel";
-var ORG_NAME = "khimanimustafa";
+var ORG_NAME = "linfeng";
 var APP_NAME = "sandbox";
 
 function doUserLogin(loginObj, successCB, errorCB) {

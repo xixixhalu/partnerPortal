@@ -197,10 +197,10 @@ function createOfferClicked() {
         offerObj.NUM_VISITS = 0;
         offerObj.NUM_REDEMPTIONS = 0;
 
-        var geofenceObj = {};
-        geofenceObj.radius = offerObj.radius;
-        geofenceObj.longitude = offerObj.longitude;
-        geofenceObj.latitude = offerObj.latitude;
+        // var geofenceObj = {};
+        // geofenceObj.radius = offerObj.radius;
+        // geofenceObj.longitude = offerObj.longitude;
+        // geofenceObj.latitude = offerObj.latitude;
         //delete offerObj.radius;
         //delete offerObj.longitude;
         //delete offerObj.latitude;
@@ -211,28 +211,31 @@ function createOfferClicked() {
         offerObj.image_type = "jpg";
 
         createOffer(offerObj, function (result) {
-            geofenceObj.offer_uuid = result._data.uuid;
+            $.mobile.changePage("#page_view_partner_offers");
+            $("#form_create_offer").trigger("reset");
+            $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
+            //geofenceObj.offer_uuid = result._data.uuid;
             
-            createGeofence(geofenceObj, function() {
-                var couponObj = {};
-                couponObj.image_data = getBase64Image($('#coupon_image_canvas').get(0));
-                couponObj.short_desc = offerObj.short_desc;
-                couponObj.image_type = "png";
-                couponObj.offer_uuid = geofenceObj.offer_uuid;
-                createCoupon(couponObj, function() {
-                    $.mobile.changePage("#page_view_partner_offers");
-                    $("#form_create_offer").trigger("reset");
-                    $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
-                },
-                function() {
-                    $.mobile.changePage("#page_create_offer_error");
-                    $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
-                });
-            },
-            function() {
-                $.mobile.changePage("#page_create_offer_error");
-                $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
-            });
+            // createGeofence(geofenceObj, function() {
+            //     var couponObj = {};
+            //     couponObj.image_data = getBase64Image($('#coupon_image_canvas').get(0));
+            //     couponObj.short_desc = offerObj.short_desc;
+            //     couponObj.image_type = "png";
+            //     couponObj.offer_uuid = geofenceObj.offer_uuid;
+            //     createCoupon(couponObj, function() {
+            //         $.mobile.changePage("#page_view_partner_offers");
+            //         $("#form_create_offer").trigger("reset");
+            //         $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
+            //     },
+            //     function() {
+            //         $.mobile.changePage("#page_create_offer_error");
+            //         $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
+            //     });
+            // },
+            // function() {
+            //     $.mobile.changePage("#page_create_offer_error");
+            //     $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
+            // });
         },
         function() {
             $.mobile.changePage("#page_create_offer_error");
@@ -307,12 +310,12 @@ function loadOffers() {
 }
 
 function viewOfferClicked(uuid) {
-    $("#div_view_offer_detail").empty();
-    $("#div_view_offer_title").empty();
-    $("#div_view_offer_img").empty();
-
     // Nested function definition for the success callback that goes to readOffer().
-     readOffer(uuid, function(offer) {
+     function viewOfferClickedSuccessCB(offer) {
+        $("#div_view_offer_detail").empty();
+        $("#div_view_offer_title").empty();
+        $("#div_view_offer_img").empty();
+
         $("#div_view_offer_title").append("<center>" + offer.store_name + "</center>");
 
         $("#div_view_offer_img").append(
@@ -349,11 +352,14 @@ function viewOfferClicked(uuid) {
         );
         $.mobile.changePage("#page_view_offer_details");
         //$("#popup_offer_details").popup("open");
-    },
-    function(){
+    };
+
+    function viewOfferClickedErrorCB(){
         $("#div_offer_details").append("Unable to get offer details at this time.");
         //$("#popup_offer_details").popup("open");
-    });
+    };
+
+    readOffer(uuid, viewOfferClickedSuccessCB, viewOfferClickedErrorCB)
 }
 
 function deleteOfferClicked(uuid) {
