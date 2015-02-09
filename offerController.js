@@ -468,6 +468,7 @@ function editOfferClicked(uuid) {
 
 function getCouponClicked(offerID){
     // var for baecode generator
+    $("#div_coupon_details").empty();
     TimeStamp = new Date().getTime();  // system time- how many minllion seconds
     MTimeStamp = parseInt(TimeStamp/(1000 * 60)); // how many minutes
     MTimeStampString = MTimeStamp.toString();
