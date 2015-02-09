@@ -158,7 +158,7 @@ $(document).ready(function() {
 
     $("#popup_delete_offer").popup();
 
-    $("form[id='form_create_offer'] input[name='coupon_image']").on('change', function(ev) {
+    $("form[id='form_create_offer'] input[name='create_coupon_image']").on('change', function(ev) {
 	    var f = ev.target.files[0];
 	    var fr = new FileReader();
 
@@ -169,7 +169,7 @@ $(document).ready(function() {
 
 	    fr.readAsDataURL(f);
     });
-    $("form[id='form_edit_offer'] input[name='coupon_image']").on('change', function(ev) {
+    $("form[id='form_edit_offer'] input[name='edit_coupon_image']").on('change', function(ev) {
 
         var f = ev.target.files[0];
         var fr = new FileReader();
@@ -444,6 +444,8 @@ function editOfferClicked(uuid) {
         $("#form_edit_offer input[name*='radius']").val(offer.radius);
         $("#form_edit_offer input[name*='redeem_password']").val(offer.redeem_password);
         $("#form_edit_offer input[name*='redeem_password_confirmed']").val(offer.redeem_password_confirmed);
+
+        $('#form_edit_offer #edit_coupon_image_canvas').attr('src', 'data:image/jpeg;base64,' + offer.image_data);
 
         $("#check_coupon").append(
             "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
