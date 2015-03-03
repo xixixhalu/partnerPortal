@@ -45,9 +45,11 @@ function getEntities(type, attribute, value, typeAttributes, successCB, errorCB)
                 var currentListItem = {};
 
                 typeAttributes.forEach( function(attribute) {
-                    currentListItem[attribute] = currentEntity.get(attribute);
+                	//if(attribute != 'image_data') {
+                    	currentListItem[attribute] = currentEntity.get(attribute);
+                	//}
                 });
-
+                //console.log(currentListItem);
                 entityList.push(currentListItem);
 			}
             successCB(entityList);
@@ -155,12 +157,11 @@ function deleteEntities(type, attribute, value, successCB, errorCB) {
 }
 
 // CRUD: Read Many.
-// Gets all the entitites of a specified type where the specified attribute
+// Gets all the entitites of a specified type where the specified "where" statement
 // matches the specified query string.
 // The success callback has one argument that refers to a list of the retrieved entities.
 function getSpecifiedEntities(type, query, typeAttributes, successCB, errorCB) {
 
-	doGuestLogin();
     var entityList = [];
 	var queryObj = {
 		client:CLIENT,
@@ -172,7 +173,7 @@ function getSpecifiedEntities(type, query, typeAttributes, successCB, errorCB) {
 			limit:999
 		}
 	}
-	console.log(queryObj);
+				   
 	var entities = new Apigee.Collection(queryObj);
 
 	entities.fetch(
@@ -193,6 +194,38 @@ function getSpecifiedEntities(type, query, typeAttributes, successCB, errorCB) {
 			errorCB();
 		}
 	);
+}
+
+// CRUD: Read Many.
+// Gets all the entitites of a specified type where the specified attribute
+// matches the specified query string.
+// The success callback has one argument that refers to a list of the retrieved entities.
+function getSpecifiedAttributesFromEntity(type, query, typeAttributes, successCB, errorCB) {
+
+	var entityList = [];
+
+	var queryObj = {
+		endpoint : type,
+		method: "GET",
+		qs : {ql : query, limit: 999}
+	}
+
+	CLIENT.request(queryObj, function(error, response) {
+		if (error) {
+			errorCB();
+		} else {
+
+			response.list.forEach( function(entity) {
+		        var currentListItem = {};
+		        var i = 0;
+		        typeAttributes.forEach( function(attribute) {
+		            currentListItem[attribute] = entity[i++];
+		        });
+		        entityList.push(currentListItem);
+			});
+		    successCB(entityList);
+		}
+	});
 }
 
 

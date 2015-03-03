@@ -1,3 +1,9 @@
+var MULTI_OFFER_ATTRIBUTES = [
+    "uuid",
+    "short_desc",
+    "store_name"
+];
+
 var OFFER_ATTRIBUTES = [
     "uuid",
     "created",
@@ -37,7 +43,9 @@ function readOffer(uuid, successCB, errorCB) {
 }
 
 function readMultipleOffers(attribute, value, successCB, errorCB) {
-    getEntities("offer", attribute, value, OFFER_ATTRIBUTES, successCB, errorCB);
+    var query = "select uuid, short_desc, store_name where " + attribute + " = " + value + " order by created desc";
+    getSpecifiedAttributesFromEntity("offer", query, MULTI_OFFER_ATTRIBUTES, successCB, errorCB);
+    //getEntities("offer", attribute, value, MULTI_OFFER_ATTRIBUTES, successCB, errorCB);
 }
 
 function updateOffer(uuid, updateOfferObj, successCB, errorCB) {

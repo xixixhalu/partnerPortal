@@ -186,6 +186,7 @@ $(document).ready(function() {
 function createOfferClicked() {
     var validator = $("#form_create_offer").validate();
 
+
     if(validator.form()) {
         $("#button_create_offer").prop('disabled', true).addClass('ui-disabled');
         var offerObj = $("#form_create_offer").serializeObject();
@@ -214,6 +215,8 @@ function createOfferClicked() {
             $.mobile.changePage("#page_view_partner_offers");
             $("#form_create_offer").trigger("reset");
             $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
+
+            //$('#form_create_offer #coupon_image_canvas').attr('src', '');
             //geofenceObj.offer_uuid = result._data.uuid;
             
             // createGeofence(geofenceObj, function() {
@@ -257,6 +260,8 @@ function editOfferStoreClicked() {
         offerObj.image_type = "jpg";
 
         offerObj.uuid = editofferuuid;
+
+        offerObj.match_name = offerObj.store_name.replace(/\W/g, '');
 
         updateOffer(offerObj.uuid,offerObj, function (result) {
             $.mobile.changePage("#page_view_partner_offers");
@@ -404,8 +409,8 @@ function deleteOfferClickedUnconfirmed(uuid) {
 function getBase64Image(img) {
 	// Create an empty canvas element
 	var canvas = document.createElement("canvas");
-	canvas.width = img.width;
-	canvas.height = img.height;
+	canvas.width = img.naturalWidth;
+	canvas.height = img.naturalHeight;
 
 	// Copy the image contents to the canvas
 	var ctx = canvas.getContext("2d");
@@ -470,7 +475,9 @@ function editOfferClicked(uuid) {
 
 function getCouponClicked(offerID){
     // var for baecode generator
-    $("#div_coupon_details").empty();
+    $("#div_coupon_image").empty();
+    $("#div_coupon_storecode").empty();
+    $("#div_coupon_barcode").empty();
     TimeStamp = new Date().getTime();  // system time- how many minllion seconds
     MTimeStamp = parseInt(TimeStamp/(1000 * 60)); // how many minutes
     MTimeStampString = MTimeStamp.toString();
@@ -479,14 +486,14 @@ function getCouponClicked(offerID){
     
     readOffer(offerID, function() {
         //display coupon
-        $('#div_coupon_details').append('<img src="data:image/png;base64,' + couponImage + '" height="100%" width="100%" /><br>');
-        $('#div_barcode').barcode(CouponCode, "code93",{barWidth:1, barHeight:50});
-        $('#div_coupon_details').append('<h3>Store code: ' + window.globalID.couponEncode.substr(0,3)
+        $('#div_coupon_image').append('<img src="data:image/png;base64,' + couponImage + '" height="640px" width="480px" /><br>');
+        $('#div_coupon_barcode').barcode(CouponCode, "code93",{barWidth:1, barHeight:50});
+        $('#div_coupon_storecode').append('<h3>Store code: ' + window.globalID.couponEncode.substr(0,3)
         + window.globalID.couponEncode.slice(-3) + '</h3>')
 
         },
         function(){
-        $('#div_coupon_details').append('Unable to get coupon at this time.');
+        $('#div_coupon_image').append('Unable to get coupon at this time.');
 
         });
     $.mobile.changePage("#page_coupon_details");
