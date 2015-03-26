@@ -62,17 +62,24 @@ $(document).ready(function() {
             },
             radius: {
                 required:true,
-                range:[100, 500]
+                range:[50, 500]
             },
             redeem_password: {
                 required: true,
-                rangelength:[6, 15]
+                digits: true,
+                minlength: 4,
+                maxlength: 4,
             },
             redeem_password_confirmed: {
                 required: true,
-                rangelength:[6, 15],
+                digits: true,
+                minlength: 4,
+                maxlength: 4,
                 equalTo: "#form_create_offer #redeem_password"
             }
+            // create_coupon_image: {
+            //     required: true
+            // }
         },
         errorPlacement: function (error, element) {
             error.appendTo(element.parent().prev());
@@ -129,17 +136,24 @@ $(document).ready(function() {
             },
             radius: {
                 required:true,
-                range:[100, 500]
+                range:[50, 500]
             },
             redeem_password: {
                 required: true,
-                rangelength:[6, 15]
+                digits: true,
+                minlength: 4,
+                maxlength: 4,
             },
             redeem_password_confirmed: {
                 required: true,
-                rangelength:[6, 15],
+                digits: true,
+                minlength: 4,
+                maxlength: 4,
                 equalTo: "#form_edit_offer #redeem_password"
             }
+            // edit_coupon_image: {
+            //     required: true
+            // }
         },
         errorPlacement: function (error, element) {
             error.appendTo(element.parent().prev());
@@ -190,25 +204,15 @@ function createOfferClicked() {
     if(validator.form()) {
         $("#button_create_offer").prop('disabled', true).addClass('ui-disabled');
         var offerObj = $("#form_create_offer").serializeObject();
-        //delete offerObj.coupon_image;
-        //delete offerObj.redeem_password_confirmed;
 
         //add three new attributes in accordance with 
         offerObj.AVG_DWELL_TIME = 0;
         offerObj.NUM_VISITS = 0;
         offerObj.NUM_REDEMPTIONS = 0;
 
-        // var geofenceObj = {};
-        // geofenceObj.radius = offerObj.radius;
-        // geofenceObj.longitude = offerObj.longitude;
-        // geofenceObj.latitude = offerObj.latitude;
-        //delete offerObj.radius;
-        //delete offerObj.longitude;
-        //delete offerObj.latitude;
 
-        
         offerObj.image_data = getBase64Image($('#coupon_image_canvas').get(0));
-        
+
         offerObj.image_type = "jpg";
 
         createOffer(offerObj, function (result) {
@@ -216,29 +220,8 @@ function createOfferClicked() {
             $("#form_create_offer").trigger("reset");
             $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
 
-            //$('#form_create_offer #coupon_image_canvas').attr('src', '');
-            //geofenceObj.offer_uuid = result._data.uuid;
-            
-            // createGeofence(geofenceObj, function() {
-            //     var couponObj = {};
-            //     couponObj.image_data = getBase64Image($('#coupon_image_canvas').get(0));
-            //     couponObj.short_desc = offerObj.short_desc;
-            //     couponObj.image_type = "png";
-            //     couponObj.offer_uuid = geofenceObj.offer_uuid;
-            //     createCoupon(couponObj, function() {
-            //         $.mobile.changePage("#page_view_partner_offers");
-            //         $("#form_create_offer").trigger("reset");
-            //         $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
-            //     },
-            //     function() {
-            //         $.mobile.changePage("#page_create_offer_error");
-            //         $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
-            //     });
-            // },
-            // function() {
-            //     $.mobile.changePage("#page_create_offer_error");
-            //     $("#button_create_offer").prop('disabled', false).removeClass('ui-disabled');
-            // });
+            //delete previous image
+            $('#form_create_offer #coupon_image_canvas').attr('src', '');
         },
         function() {
             $.mobile.changePage("#page_create_offer_error");
@@ -254,8 +237,9 @@ function editOfferStoreClicked() {
         $("#button_edit_offer").prop('disabled', true).addClass('ui-disabled');
         var offerObj = $("#form_edit_offer").serializeObject();
 
-
+        //if ($('#edit_coupon_image_canvas').get(0) != "data:,") {
         offerObj.image_data = getBase64Image($('#edit_coupon_image_canvas').get(0));
+        //}
 
         offerObj.image_type = "jpg";
 
@@ -263,7 +247,7 @@ function editOfferStoreClicked() {
 
         offerObj.match_name = offerObj.store_name.replace(/\W/g, '');
 
-        updateOffer(offerObj.uuid,offerObj, function (result) {
+        updateOffer(offerObj.uuid, offerObj, function (result) {
             $.mobile.changePage("#page_view_partner_offers");
             $("#button_edit_offer").prop('disabled', false).removeClass('ui-disabled');
         },
@@ -363,23 +347,12 @@ function viewOfferClicked(uuid) {
         $("#div_offer_details").append("Unable to get offer details at this time.");
         //$("#popup_offer_details").popup("open");
     };
-
     readOffer(uuid, viewOfferClickedSuccessCB, viewOfferClickedErrorCB)
 }
 
 function deleteOfferClicked(uuid) {
     deleteOffer(uuid, function() {
-        deleteCouponsForOffer(uuid, function() {
-            deleteGeofencesForOffer(uuid, function() {
-                loadOffers();
-            },
-            function() {
-                loadOffers();
-            });
-        },
-        function() {
-            loadOffers();
-        });
+        loadOffers();
     },
     function() {
         loadOffers();
@@ -450,7 +423,11 @@ function editOfferClicked(uuid) {
         $("#form_edit_offer input[name*='redeem_password']").val(offer.redeem_password);
         $("#form_edit_offer input[name*='redeem_password_confirmed']").val(offer.redeem_password_confirmed);
 
-        $('#form_edit_offer #edit_coupon_image_canvas').attr('src', 'data:image/jpeg;base64,' + offer.image_data);
+        //If image is empty, the stored image will be "data:," generated by function getBase64Image()
+        //So if empty image is stored, we just don't need to pull it from database
+        if (offer.image_data != "data:,") {
+            $('#form_edit_offer #edit_coupon_image_canvas').attr('src', 'data:image/jpeg;base64,' + offer.image_data);
+        }
 
         $("#check_coupon").append(
             "<a href='#' data-role='button' class='ui-link ui-btn ui-shadow ui-corner-all' "
@@ -550,7 +527,7 @@ function checkGeoClicked(option){
                 _radius = 200;
             }
             _radius = parseInt(_radius);
-            if(!(_radius <= 500 && _radius >= 100)){
+            if(!(_radius <= 500 && _radius >= 50)){
                 alert("Please input valid radius!");
             }
             else{
